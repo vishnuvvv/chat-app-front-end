@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@500&family=Work+Sans:wght@300&display=swap");
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  background-image: linear-gradient(
+    to top,
+    #5dfbf4,
+    #55fdea,
+    #53fede,
+    #57ffd0,
+    #61ffc1,
+    #6effb9,
+    #7affb1,
+    #86ffa9,
+    #92ffa9,
+    #9dffaa,
+    #a7ffab,
+    #b0ffac
+  );
+  background-size: cover;
+  background-position: center;
+}
