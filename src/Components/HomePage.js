@@ -9,8 +9,9 @@ import {
 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-
+//import axios from "axios";
 import React, { useState } from "react";
+//import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const initialFormValues = {
@@ -18,12 +19,15 @@ const HomePage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    photo: [],
+    image:""
   };
+ 
   const [formInputs, setFormInputs] = useState(initialFormValues);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  //const navigate = useNavigate()
   //console.log(isSignUp);
+
   console.log(formInputs);
   const handleChange = (e) => {
     e.preventDefault();
@@ -31,9 +35,11 @@ const HomePage = () => {
     setFormInputs({ ...formInputs, [name]: value });
   };
 
+  
+
   return (
     <div>
-      <form>
+      <form >
         <Box
           display="flex"
           flexDirection={"column"}
@@ -107,16 +113,17 @@ const HomePage = () => {
           )}
           {isSignUp && (
             <TextField
+              type={"file"}
+              value={formInputs.image}
               onChange={handleChange}
               name="photo"
-              value={formInputs.photo}
-              type={"file"}
               margin="normal"
               borderRadius="6"
             />
           )}
 
           <Button
+            type="submit"
             sx={{ marginTop: 3, borderRadius: 3 }}
             variant="contained"
             color="success"
