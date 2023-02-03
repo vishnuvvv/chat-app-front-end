@@ -9,9 +9,9 @@ import {
 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-//import axios from "axios";
-import React, { useState } from "react";
-//import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const initialFormValues = {
@@ -19,27 +19,63 @@ const HomePage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    image:""
   };
- 
+
   const [formInputs, setFormInputs] = useState(initialFormValues);
+  const [photo, setPhoto]= useState()
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  //const navigate = useNavigate()
+  const navigate = useNavigate();
   //console.log(isSignUp);
-
   console.log(formInputs);
+
   const handleChange = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
     setFormInputs({ ...formInputs, [name]: value });
   };
 
-  
+  const upLoadImage = (e) => {
+    e.preventDefault();
+    setPhoto({ ...photo, photo:e.target.files[0] });
+  };
+
+  const sendFormData = async (type ="signup") => {
+    const res = await axios.post(`http://localhost:5000/api/user/${type}`, {
+      userName: formInputs.userName,
+      email: formInputs.email,
+      password: formInputs.password,
+      imageFile: photo
+    }).catch((err)=>console.log(err))
+
+    const data = await res.data;
+    console.log(data);
+    return data;
+  };
+
+  const finalSubmit = (e) => {
+    e.preventDefault();
+
+    if (!isSignUp) {
+      sendFormData("signup")
+        .then((data) => localStorage.setItem("userId", data.user._id))
+        .then(() => navigate("/chats"))
+        .then((data) => console.log(data));
+    } else {
+      sendFormData().then((data) =>
+        localStorage
+          .setItem("userId", data.user.id)
+          .then(() => navigate("/chats"))
+          .then((data) => {
+            console.log(data);
+          })
+      );
+    }
+  };
 
   return (
     <div>
-      <form >
+      <form onSubmit={finalSubmit}>
         <Box
           display="flex"
           flexDirection={"column"}
@@ -113,10 +149,10 @@ const HomePage = () => {
           )}
           {isSignUp && (
             <TextField
+              onChange={upLoadImage}
+              name="imageFile"
+              value={formInputs.imageFile}
               type={"file"}
-              value={formInputs.image}
-              onChange={handleChange}
-              name="photo"
               margin="normal"
               borderRadius="6"
             />
