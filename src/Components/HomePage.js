@@ -22,12 +22,13 @@ const HomePage = () => {
   };
 
   const [formInputs, setFormInputs] = useState(initialFormValues);
-  const [photo, setPhoto]= useState()
+  const [photo, setPhoto] = useState();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   //console.log(isSignUp);
   console.log(formInputs);
+  console.log(photo)
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -37,45 +38,48 @@ const HomePage = () => {
 
   const upLoadImage = (e) => {
     e.preventDefault();
-    setPhoto({ ...photo, photo:e.target.files[0] });
+    setPhoto({ ...photo, photo: e.target.files[0] });
   };
 
-  const sendFormData = async (type ="signup") => {
-    const res = await axios.post(`http://localhost:5000/api/user/${type}`, {
-      userName: formInputs.userName,
-      email: formInputs.email,
-      password: formInputs.password,
-      imageFile: photo
-    }).catch((err)=>console.log(err))
+ 
+  const sendFormData = async (type = "signin") => {
+    console.log(type);
+    const res = await axios
+      .post(`http://localhost:5000/api/user/${type}`, {
+        userName: formInputs.userName,
+        email: formInputs.email,
+        password: formInputs.password,
+        imageFile: photo,
+      })
+      .catch((err) => console.log(err));
 
     const data = await res.data;
     console.log(data);
     return data;
   };
-
-  const finalSubmit = (e) => {
+   
+  const finalSubmit = async(e) => {
     e.preventDefault();
-
-    if (!isSignUp) {
+ 
+    if (isSignUp) {
       sendFormData("signup")
         .then((data) => localStorage.setItem("userId", data.user._id))
         .then(() => navigate("/chats"))
         .then((data) => console.log(data));
     } else {
-      sendFormData().then((data) =>
-        localStorage
-          .setItem("userId", data.user.id)
-          .then(() => navigate("/chats"))
-          .then((data) => {
-            console.log(data);
-          })
-      );
+      sendFormData()
+        .then((data) => localStorage.setItem("userId", data.user.id))
+        .then(() => navigate("/chats"))
+        .then((data) => console.log(data));
     }
+
   };
 
   return (
     <div>
-      <form onSubmit={finalSubmit}>
+
+      <form onSubmit={finalSubmit} enctype="multipart/form-data" action="/post" method='POST' >
+
         <Box
           display="flex"
           flexDirection={"column"}
@@ -181,3 +185,5 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
