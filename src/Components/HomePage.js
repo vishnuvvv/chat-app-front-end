@@ -14,53 +14,108 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const initialFormValues = {
+  const [formInputs, setFormInputs] = useState({
     userName: "",
     email: "",
     password: "",
     confirmPassword: "",
-  };
-
-  const [formInputs, setFormInputs] = useState(initialFormValues);
-  const [photo, setPhoto] = useState();
+    imageFile: null,
+  });
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   //console.log(isSignUp);
   console.log(formInputs);
-  console.log(photo)
 
   const handleChange = (e) => {
     e.preventDefault();
-    const { name, value } = e.target;
-    setFormInputs({ ...formInputs, [name]: value });
+    const { name, value, files } = e.target;
+    if (name === "imageFile") {
+      setFormInputs({ ...formInputs, [name]: files[0] });
+    } else {
+      setFormInputs({ ...formInputs, [name]: value });
+    }
   };
-
-  const upLoadImage = (e) => {
-    e.preventDefault();
-    setPhoto({ ...photo, photo: e.target.files[0] });
-  };
-
- 
   const sendFormData = async (type = "signin") => {
     console.log(type);
-    const res = await axios
-      .post(`http://localhost:5000/api/user/${type}`, {
-        userName: formInputs.userName,
-        email: formInputs.email,
-        password: formInputs.password,
-        imageFile: photo,
-      })
-      .catch((err) => console.log(err));
-
-    const data = await res.data;
-    console.log(data);
-    return data;
+    try {
+      const formData = new FormData();
+      formData.append("userName", formInputs.userName);
+      formData.append("email", formInputs.email);
+      formData.append("password", formInputs.password);
+      formData.append("imageFile", formInputs.imageFile);
+  
+      const res = await axios.post(
+        `http://localhost:5000/api/user/${type}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const data = await res.data;
+      console.log(data);
+      return data;
+    } catch (err) {
+      console.log(err);
+    }
   };
-   
-  const finalSubmit = async(e) => {
+  
+/*
+  const sendFormData = async (type = "signin") => {
+    console.log(type);
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/api/user/${type}`,
+        {
+          userName: formInputs.userName,
+          email: formInputs.email,
+          password: formInputs.password,
+          imageFile: formInputs.imageFile,
+        },
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const data = await res.data;
+      console.log(data);
+      return data;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  */
+
+  const finalSubmit = (e) => {
     e.preventDefault();
- 
+
+    try {
+      if (isSignUp) {
+        sendFormData("signup")
+          .then((data) => localStorage.setItem("userId", data.user._id))
+          .then(() => navigate("/chats"))
+          .catch((error) => {
+            console.error(error);
+          });
+      } else {
+        sendFormData()
+          .then((data) => localStorage.setItem("userId", data.user._id))
+          .then(() => navigate("/chats"))
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+/*
+  const finalSubmit = (e) => {
+    e.preventDefault();
+
     if (isSignUp) {
       sendFormData("signup")
         .then((data) => localStorage.setItem("userId", data.user._id))
@@ -68,18 +123,21 @@ const HomePage = () => {
         .then((data) => console.log(data));
     } else {
       sendFormData()
-        .then((data) => localStorage.setItem("userId", data.user.id))
+        .then((data) => localStorage.setItem("userId", data.user._id))
         .then(() => navigate("/chats"))
         .then((data) => console.log(data));
     }
-
   };
+  */
 
   return (
     <div>
-
-      <form onSubmit={finalSubmit} enctype="multipart/form-data" action="/post" method='POST' >
-
+      <form
+        onSubmit={finalSubmit}
+        enctype="multipart/form-data"
+        action="/post"
+        method="POST"
+      >
         <Box
           display="flex"
           flexDirection={"column"}
@@ -104,7 +162,6 @@ const HomePage = () => {
             <TextField
               onChange={handleChange}
               name="userName"
-              value={formInputs.userName}
               placeholder="Name"
               variant="outlined"
               margin="normal"
@@ -113,7 +170,6 @@ const HomePage = () => {
           <TextField
             onChange={handleChange}
             name="email"
-            value={formInputs.email}
             placeholder="Email"
             variant="outlined"
             margin="normal"
@@ -122,7 +178,6 @@ const HomePage = () => {
             onChange={handleChange}
             type={showPassword ? "text" : "password"}
             name="password"
-            value={formInputs.password}
             placeholder="Password"
             variant="outlined"
             margin="normal"
@@ -144,7 +199,6 @@ const HomePage = () => {
             <TextField
               onChange={handleChange}
               name="confirmPassword"
-              value={formInputs.confirmPassword}
               type={"password"}
               placeholder="Confirm Password"
               variant="outlined"
@@ -153,10 +207,10 @@ const HomePage = () => {
           )}
           {isSignUp && (
             <TextField
-              onChange={upLoadImage}
+              onChange={handleChange}
               name="imageFile"
-              value={formInputs.imageFile}
               type={"file"}
+              accept="image/*"
               margin="normal"
               borderRadius="6"
             />
@@ -185,5 +239,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
